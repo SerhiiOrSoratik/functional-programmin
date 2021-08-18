@@ -41,73 +41,40 @@ let hasType = _.curry((c, r) => r.type == c);
 const isRectangle = hasType("rectangle");
 const isSquare = hasType("square");
 
-const _filter = _.curry((fun, arr) => {
-  return arr.filter(fun);
-});
+const _filter = _.curry((fun, arr) => arr.filter(fun));
 
-const calculateArea = (n) => {
-  return n.width * n.height;
-};
+const calculateArea = (n) => n.width * n.height;
 
-const _map = _.curry((fun, arr) => {
-  return arr.map(fun);
-});
+const _map = _.curry((fun, arr) =>  arr.map(fun));
 
-const sumPerimeter = (current, order) =>
-  current + (order.width * 2 + order.height * 2);
+const sumPerimeter = (current, order) => current + (order.width * 2 + order.height * 2);
 
-const _reduce = _.curry((fn, initValue, arr) => {
-  return arr.reduce(fn, initValue);
-});
+const _reduce = _.curry((fn, initValue, arr) =>  arr.reduce(fn, initValue));
 
-const _max = (arr) => {
-  return Math.max(...arr);
-};
+const _max = arr => Math.max(...arr);
 
-const flow =
-  (...arrayFunctions) =>
-  (figures) => {
+const flow = (...arrayFunctions) => figures => {
     return arrayFunctions.reduce((result, current) => {
       return current(result);
     }, figures);
   };
 
-const combine =
-  (...arrayFunctions) =>
-  (figures) => {
+const combine = (...arrayFunctions) => figures => {
     return arrayFunctions.reduceRight((result, current) => {
       return current(result);
     }, figures);
   };
 
 // predicates 
-const and = (fn1, fn2) => (figure) => {
-  return fn1(figure) === true && fn2(figure) === true ? true : false;
-};
+const and = (fn1, fn2) => item => fn1(item) && fn2(item);
+const or = (fn1, fn2) => item => fn1(item) || fn2(item);
+const all = (...fn) => item => fn.every(f => f(item));
+const any = (...fn) => item => fn.some(f => f(item));
 
-const or = (fn1, fn2) => (figure) => {
-  return fn1(figure) === true || fn2(figure) === true ? true : false;
-};
+// console.log(or(and(isBlack, isRectangle),and(isRed, isRectangle))(figures[0]))
+// console.log(or(and(isBlack, isRectangle),and(isRed, isSquare))(figures[0]))
 
-const all =
-  (...fn) =>
-  (figure) => {
-    return fn.every((f) => f(figure) === true);
-  };
-
-const any = (...fn) => 
-(figure) => {
-    let result = false;
-    fn.forEach(f => {
-        if (f(figure)) {
-            result = true;
-        }
-    })
-    return result;
-}
-
-
-console.log("\n reduce \n");
+console.log(" reduce");
 console.log(
   "Максимальна площа із всіх чорних квадратів: " +
     flow(_filter(and(isBlack, isSquare)), _map(calculateArea), _max)(figures)
@@ -118,7 +85,7 @@ console.log(
     flow(_filter(and(isRed, isRectangle)), _reduce(sumPerimeter, 0))(figures)
 );
 
-console.log("\n combine \n");
+console.log("\n combine");
 console.log(
   "Максимальна площа із всіх чорних квадратів: " +
     combine(_max, _map(calculateArea), _filter(and(isBlack, isSquare)))(figures)
