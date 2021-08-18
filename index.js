@@ -37,9 +37,9 @@ let hasColor = _.curry((c, r) => r.color == c);
 const isRed = hasColor("red");
 const isBlack = hasColor("black");
 
-let isDesiredFigure = _.curry((c, t, r) => r.color == c && r.type == t);
-const isBlackSquare = isDesiredFigure("black", "square");
-const isRedRectangle = isDesiredFigure("red", "rectangle");
+let hasType = _.curry((c, r) => r.type == c);
+const isRectangle = hasType("rectangle");
+const isSquare = hasType("square");
 
 const _filter = _.curry((fun, arr) => {
   return arr.filter(fun);
@@ -80,25 +80,51 @@ const combine =
     }, figures);
   };
 
-console.log("\n reduce \n");
+// predicates 
+const and = (fn1, fn2) => (figure) => {
+  return fn1(figure) === true && fn2(figure) === true ? true : false;
+};
 
+const or = (fn1, fn2) => (figure) => {
+  return fn1(figure) === true || fn2(figure) === true ? true : false;
+};
+
+const all =
+  (...fn) =>
+  (figure) => {
+    return fn.every((f) => f(figure) === true);
+  };
+
+const any = (...fn) => 
+(figure) => {
+    let result = false;
+    fn.forEach(f => {
+        if (f(figure)) {
+            result = true;
+        }
+    })
+    return result;
+}
+
+
+console.log("\n reduce \n");
 console.log(
   "Максимальна площа із всіх чорних квадратів: " +
-    flow(_filter(isBlackSquare), _map(calculateArea), _max)(figures)
+    flow(_filter(and(isBlack, isSquare)), _map(calculateArea), _max)(figures)
 );
 
 console.log(
   "Сума периметрів всіх червоних прямокутників: " +
-    flow(_filter(isRedRectangle), _reduce(sumPerimeter, 0))(figures)
+    flow(_filter(and(isRed, isRectangle)), _reduce(sumPerimeter, 0))(figures)
 );
 
 console.log("\n combine \n");
 console.log(
   "Максимальна площа із всіх чорних квадратів: " +
-    combine(_max, _map(calculateArea), _filter(isBlackSquare))(figures)
+    combine(_max, _map(calculateArea), _filter(and(isBlack, isSquare)))(figures)
 );
 
 console.log(
   "Сума периметрів всіх червоних прямокутників: " +
-    combine(_reduce(sumPerimeter, 0), _filter(isRedRectangle))(figures)
+    combine(_reduce(sumPerimeter, 0), _filter(and(isRed, isRectangle)))(figures)
 );
